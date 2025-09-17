@@ -2,3 +2,4 @@ pandas
 requests
 sqlalchemy
 notebook
+pycountry

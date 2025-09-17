@@ -5,7 +5,12 @@ import sqlalchemy
 from sqlalchemy import orm
 
 class Base(orm.DeclarativeBase):
-    pass
+    type_annotation_map = {
+        int: sqlalchemy.INTEGER,
+        str: sqlalchemy.TEXT,
+        float: sqlalchemy.REAL
+    }
+
 
 class DataEntry(Base):
     __tablename__ = "data"
