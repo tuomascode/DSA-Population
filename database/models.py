@@ -16,8 +16,8 @@ class DataEntry(Base):
     __tablename__ = "data"
     __table_args__ = {"sqlite_strict": True, "comment": "Core Time-Serialized data entries"}
     year: orm.Mapped[int] = orm.mapped_column(primary_key=True, comment="Statistic for specified year.")
-    gdp: orm.Mapped[int] = orm.mapped_column(comment="GDP at the time")
-    population: orm.Mapped[int] = orm.mapped_column(comment="Population at the time")
+    gdp: orm.Mapped[int|None] = orm.mapped_column(comment="GDP at the time")
+    population: orm.Mapped[int|None] = orm.mapped_column(comment="Population at the time")
     country_code: orm.Mapped[str] = orm.mapped_column(sqlalchemy.ForeignKey("countries.country_code"), comment="ISO 3166-1 alpha-2", primary_key=True)
 
     country: orm.Mapped["Country"] = orm.relationship(back_populates="records")
