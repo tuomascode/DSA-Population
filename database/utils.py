@@ -5,6 +5,7 @@ from database import models
 from pycountry import countries
 
 def get_country(name: str):
+    # The index is available from countries.search_fuzzy(name)[0].alpha_2
     return countries.search_fuzzy(name)[0]
 
 def setup_countrydb():
