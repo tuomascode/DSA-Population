@@ -2,7 +2,7 @@ import pathlib
 
 from sqlalchemy import create_engine, event, Engine, orm
 
-import models
+import database.models
 
 # Get the directory of the current file
 BASE_DIR = pathlib.Path(__file__).parent

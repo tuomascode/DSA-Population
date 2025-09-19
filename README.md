@@ -28,3 +28,7 @@ This database is made available under the **Open Database License: [http://opend
 
 * **Country Location Data:** Licensed under the **Open Database License (ODbL-1.0)**.
 * **Population Data:** Licensed under the **Creative Commons Attribution 3.0 IGO (CC BY 3.0 IGO)**.
+
+#### misc
+
+https://correlatesofwar.org/wp-content/uploads/wrp-codebook-bibliography.pdf
