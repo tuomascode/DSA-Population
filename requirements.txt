@@ -3,3 +3,5 @@ requests
 sqlalchemy
 notebook
 pycountry
+matplotlib
+scipy
