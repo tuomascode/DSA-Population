@@ -2,6 +2,12 @@ import os
 import requests
 import pandas as pd
 import numpy as np
+from scipy.interpolate import PchipInterpolator
+
+def solve_missing_values(y, x):
+    all_years = np.arange(min(x), max(x) + 1, 1)
+    interp = PchipInterpolator(x, y)
+    return interp(all_years), all_years
 
 class Data:
     POP_DATA_URL = "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_Demographic_Indicators_Medium.csv.gz"
@@ -142,39 +148,38 @@ class Data:
     
     @staticmethod
     def enrich_relig_df(relig_df):
-        full_years = np.arange(relig_df["year"].min(), relig_df["year"].max() + 1)
         countries = relig_df["name"].unique()
-        solved_rows = []
+        solved_dfs = []
+        columns = ["christian", "islam", "buddhist", "judaism", "nonrelig", "other", "pop"]
         for country in countries:
-            for year in full_years:
-                    base = {
-                                        "year": year,
-                                        "name": country,
-                                        "christian": np.nan,
-                                        "islam": np.nan,
-                                        "buddhist": np.nan,
-                                        "nonrelig": np.nan,
-                                        "other": np.nan,
-                                        "sum": np.nan
-                                    } 
-                    if year % 5 == 0:
-                        try:
-                            solved_row = relig_df.loc[(relig_df["name"] == country) & (relig_df["year"] == year)].iloc[0].copy().to_dict()
-                        except:
-                            solved_row = base
-                            
-                    else:
-                        solved_row = base 
-                    solved_rows.append(solved_row)
-        new_df = pd.DataFrame(solved_rows)
+            if country in ["KOS", "MNG"]:
+                continue
+            country_rows = relig_df.loc[(relig_df["name"] == country)]
+            x = country_rows["year"].unique()
+            all_years = np.arange(min(x), max(x) + 1, 1)
+            df = pd.DataFrame({
+                "year": all_years,
+                "name": [country for _ in range(len(all_years))]
+            })
+            for column in columns:
+                try:
+                    y, _ = solve_missing_values(country_rows[column], x)
+                    df[column] = y
+                    df[column] = df[column].astype(int) * 1000
+                except:
+                    print(country, country_rows[column], column)
+                    exit()
+            solved_dfs.append(df)
+        new_df = pd.concat(solved_dfs, ignore_index=True)
         return new_df
 
 if __name__ == "__main__":
     relig_raw_df = Data.get_relig_df()
     relig_df = Data.enrich_relig_df(relig_raw_df)
+    relig_df.to_csv("data/new_relig_df.csv")
 
-    relig_raw_df.to_csv(Data.RELIG_PROCESSED_PATH)
+    # relig_raw_df.to_csv(Data.RELIG_PROCESSED_PATH)
 
-    pop_df = Data.get_pop_df()
-    pop_df.to_csv(Data.POP_PROCESSED_PATH)
-    print(pop_df.head(5))
+    # pop_df = Data.get_pop_df()
+    # pop_df.to_csv(Data.POP_PROCESSED_PATH)
+    # print(pop_df.head(5))
