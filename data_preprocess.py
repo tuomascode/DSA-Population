@@ -150,20 +150,17 @@ class Data:
             "name": df["name"],
             "abb": df["name"],
             "year": df["year"],
-            "christian": df["chrstgen"],
-            
-            "islam": df["islmgen"],
-            
-            "buddhist": df["budgen"],
-            
-            "nonrelig": df["nonrelig"],
+            "christian": df["chrstgen"] / df["pop"],
+            "islam": df["islmgen"] / df["pop"],
+            "buddhist": df["budgen"] / df["pop"],
+            "nonrelig": df["nonrelig"] / df["pop"],
+            "judaism": df["judgen"] / df["pop"],
+            "other": (
+                df["zorogen"] + df["hindgen"] + df["sikhgen"] + df["shntgen"] +
+                df["bahgen"] + df["taogen"] + df["jaingen"] + df["confgen"] +
+                df["syncgen"] + df["anmgen"] + df["othrgen"]
+            ) / df["pop"],
 
-            "judaism": df["judgen"],
-            
-            "other": ( df["zorogen"] + df["hindgen"] + df["sikhgen"] + df["shntgen"] +
-                        df["bahgen"] + df["taogen"] + df["jaingen"] + df["confgen"] +
-                    df["syncgen"] + df["anmgen"] + df["othrgen"]
-            ),
             "pop": df["pop"]
         })
         relig_df = Data.fix_germany(relig_df)

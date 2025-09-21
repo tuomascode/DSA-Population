@@ -4,3 +4,4 @@ env/*
 data/WRP_national.csv
 *pycache*
 data/COW-country-codes.csv
+temp.csv
