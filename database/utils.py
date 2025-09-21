@@ -5,35 +5,25 @@ from database import models
 from pycountry import countries
 
 custom_map = {
-    "XK": "Kosovo",
-    "BHM": "Bahamas",
-    "GRN": "Grenada",
-    "SVG": "Saint Vincent and the Grenadines",
-    "SKN": "Saint Kitts and Nevis",
-    "UKG": "United Kingdom",
-    "FRN": "France",
-    "MNC": "Monaco",
-    "SPN": "Spain",
-    "GMY": "Germany",
-    "GFR": "Germany",
-    "GDR": "East Germany",
-    "CZR": "Czechia",
-    "SNM": "San Marino",
-    "MLD": "Maldives",
-    "GRG": "Georgia",
-    "SWD": "Sweden",
-    "EQG": "Equatorial Guinea",
-    "CDI": "CI",
-    "BFO": "Burkina Faso",
-    "DRC": "CD",
-    "MZM": "Mozambique",
-    "UAE": "United Arab Emirates",
-    "KZK": "Kazakhstan",
-    "BNG": "Bangladesh",
-    "DRV": "North Vietnam",
-    "RVN": "South Vietnam",
-    "ETM": "Timor-Leste",
+    "Antigua & Barbuda": "Antigua and Barbuda",
+    "Cape Verde": "Cabo Verde",
+    "Czechoslovakia": "Czechoslovakia",  # historical, pycountry will fail
+    "Democratic Republic of the Congo": "Congo, The Democratic Republic of the",
+    "East Timor": "Timor-Leste",
+    "German Democratic Republic": "East Germany",  # not in pycountry
+    "German Federal Republic": "West Germany",     # not in pycountry
+    "Ivory Coast": "Côte d'Ivoire",
+    "Republic of Vietnam": "South Vietnam",        # not in pycountry
+    "St. Kitts and Nevis": "Saint Kitts and Nevis",
+    "St. Lucia": "Saint Lucia",
+    "St. Vincent and the Grenadines": "Saint Vincent and the Grenadines",
+    "Swaziland": "Eswatini",
+    "Turkey": "Türkiye",
+    "Yemen Arab Republic": "North Yemen",          # not in pycountry
+    "Yemen People's Republic": "South Yemen",      # not in pycountry
+    "Yugoslavia": "Yugoslavia"                     # not in pycountry
 }
+
 
 def get_country(name: str):
     if name in custom_map:
