@@ -123,9 +123,12 @@ class Data:
     @staticmethod
     def get_relig_df():
         df = Data.get_relig_raw_df()
+        codes = pd.read_csv(Data.download_file("https://correlatesofwar.org/wp-content/uploads/COW-country-codes.csv"))
+        code_map = codes.drop_duplicates(subset="CCode").set_index("CCode")["StateNme"]
+        df["name"] = df["state"].map(code_map)
         relig_df = pd.DataFrame({
-            "year": df["year"],
             "name": df["name"],
+            "year": df["year"],
             "christian": df["chrstgen"],
             
             "islam": df["islmgen"],
@@ -152,7 +155,7 @@ class Data:
         solved_dfs = []
         columns = ["christian", "islam", "buddhist", "judaism", "nonrelig", "other", "pop"]
         for country in countries:
-            if country in ["KOS", "MNG"]:
+            if country in ["Kosovo", "Montenegro"]:
                 continue
             country_rows = relig_df.loc[(relig_df["name"] == country)]
             x = country_rows["year"].unique()
