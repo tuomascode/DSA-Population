@@ -150,23 +150,25 @@ class Data:
             "name": df["name"],
             "abb": df["name"],
             "year": df["year"],
-            "christian": df["chrstgen"] / df["pop"],
-            "islam": df["islmgen"] / df["pop"],
-            "buddhist": df["budgen"] / df["pop"],
-            "nonrelig": df["nonrelig"] / df["pop"],
-            "judaism": df["judgen"] / df["pop"],
-            "other": (
-                df["zorogen"] + df["hindgen"] + df["sikhgen"] + df["shntgen"] +
-                df["bahgen"] + df["taogen"] + df["jaingen"] + df["confgen"] +
-                df["syncgen"] + df["anmgen"] + df["othrgen"]
-            ) / df["pop"],
+            "christian": df["chrstgen"],
+            
+            "islam": df["islmgen"],
+            
+            "buddhist": df["budgen"],
+            
+            "nonrelig": df["nonrelig"],
 
+            "judaism": df["judgen"],
+            
+            "other": ( df["zorogen"] + df["hindgen"] + df["sikhgen"] + df["shntgen"] +
+                        df["bahgen"] + df["taogen"] + df["jaingen"] + df["confgen"] +
+                    df["syncgen"] + df["anmgen"] + df["othrgen"]
+            ),
             "pop": df["pop"]
         })
         relig_df = Data.fix_germany(relig_df)
         relig_df = Data.fix_vietnam(relig_df)
         relig_df = Data.remove_split_countries(relig_df)
-        relig_df.to_csv("temp.csv", index=False)
         codes = pd.read_csv(Data.download_file("https://correlatesofwar.org/wp-content/uploads/COW-country-codes.csv")).drop_duplicates("StateAbb")
         print("Resolving country names to COW statename")
         code_map = codes.set_index("StateAbb")["StateNme"]
@@ -199,6 +201,9 @@ class Data:
                     exit()
             solved_dfs.append(df)
         new_df = pd.concat(solved_dfs, ignore_index=True)
+        columns = ["christian", "islam", "buddhist", "judaism", "nonrelig", "other"]
+        for col in tqdm(columns, desc="Changing values to relative values"):
+            new_df[col] = new_df[col] / new_df["pop"]
         return new_df
 
 if __name__ == "__main__":
