@@ -7,6 +7,7 @@ from pycountry import countries
 custom_map = {
     "Antigua & Barbuda": "Antigua and Barbuda",
     "Cape Verde": "Cabo Verde",
+    "Niger": "Republic of the Niger",
     "Czechoslovakia": "Czechoslovakia",  # historical, pycountry will fail
     "Democratic Republic of the Congo": "Congo, The Democratic Republic of the",
     "East Timor": "Timor-Leste",

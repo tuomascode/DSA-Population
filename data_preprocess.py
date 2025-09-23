@@ -91,7 +91,6 @@ class Data:
 
         df = Data.add_a2_values(df)
         df = Data.remove_split_countries(df, "alpha_2")
-        df["population"] *= 1000
         return df.reset_index(drop=True).sort_values(["alpha_2", "year"]).reset_index(drop=True)
 
     @staticmethod
@@ -254,7 +253,7 @@ class Data:
                 try:
                     y, _ = solve_missing_values(country_rows[column], x)
                     df[column] = y
-                    df[column] = df[column].astype(int) * 1000
+                    df[column] = df[column].astype(int)
                 except:
                     print(country, country_rows[column], column)
                     exit()
