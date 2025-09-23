@@ -30,6 +30,17 @@ def get_country(name: str):
         name = custom_map[name]
     return countries.search_fuzzy(name)[0]
 
+def code_based_get(alpha3: str):
+    rs = countries.get(alpha_3=alpha3)
+    if rs:
+        return rs
+    rs = lambda: None
+    setattr(rs, "alpha_2", "XX")
+    if alpha3 == "XKX": # Bypass custom Kosovo code
+        setattr(rs, "alpha_2", "XK")
+    return rs
+
+
 def setup_countrydb():
     print("Setting up country database")
     datb = database.BASE_DIR / ".." / "data" / "countries.json"
