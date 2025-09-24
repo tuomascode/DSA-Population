@@ -17,18 +17,28 @@ def interpolate_series(s, years, method="pchip"):
         return s.interpolate(method="linear", limit_area="inside")
     return s
 
+def clean_and_tag(df):
+    df.drop("Time Code", axis=1, inplace=True)
+    df.dropna(subset=["Country Code"], inplace=True)
+    df["Country Code"] = df["Country Code"].apply(lambda x: code_based_get(x).alpha_2)
+    df.drop(data[data["Country Code"] == "XXX"].index, inplace=True)
+    return df
+
 
 # === Load & clean ===
-with open("d8bf9016-48ec-453e-b74e-ae48b7d39d81_Data.csv") as csvfile:
+with open("ff9f9047-7a2a-4f98-a0a5-192c04cbc195_Data.csv") as csvfile:
     data = pd.read_csv(csvfile)
 
-data.drop(["Country Name", "Time Code"], axis=1, inplace=True)
-data.dropna(subset=["Country Code"], inplace=True)
-data["Country Code"] = data["Country Code"].apply(lambda x: code_based_get(x).alpha_2)
-data.drop(data[data["Country Code"] == "XXX"].index, inplace=True)
+data = clean_and_tag(data)
+
+d_binds: dict[str, type] = {"Country Name": str, "Country Code": str, "Time": int}
+for col in data.columns:
+    if d_binds.get(col, None) is None:
+        d_binds[col] = float
+
+data = data.astype(d_binds)
 
 # Make sure Time is sorted & usable as index for interpolation
-data = data.astype({"Time": "int32"})
 data.sort_values(["Country Code", "Time"], inplace=True)
 
 # === Apply interpolation per country & column ===
@@ -80,7 +90,8 @@ def fill_group(g):
 
 
 data = data.groupby("Country Code").apply(fill_group)
+data = data.astype({"Net migration [SM.POP.NETM]": int})
 
 # === Save cleaned dataset ===
-with open("cleanWDI.csv", "w") as csvfile:
+with open("../data/cleanWDI.csv", "w") as csvfile:
     data.to_csv(csvfile, index=False, lineterminator="\n")
