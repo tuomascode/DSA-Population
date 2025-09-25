@@ -76,9 +76,14 @@ class Data:
         df = Data.get_pop_raw_df()
         print("Parsing columns")
         df = df[df['LocTypeID'] == 4][['Location', 'Time', 'ISO2_code', 'TPopulation1Jan']]
+        print("Dropping countries with unreasonably large change")
+        changes = sorted([(key, value) for key, value in Data.get_country_pop_max_relative_change(df, "Location", "TPopulation1Jan", "Time").items()], key= lambda x:x[1], reverse=True)
+        reasonable_max_change_countries = [i[0] for i in changes if i[1] < 0.1]
+        dropped_countries = [i for i in df["Location"].unique() if i not in reasonable_max_change_countries]
+        print("Dropped countries due to too big change: ", " ".join(dropped_countries))
+        df = df[df["Location"].isin(reasonable_max_change_countries)]
         Data.rename_countries(df)
-        # df.drop(["Location"], axis=1, inplace=True)
-        df = df[df["Time"] > 1969]
+        df = df[df["Time"] > 1945]
         df = df[df["Time"] < 2025]
         df["TPopulation1Jan"] = (df["TPopulation1Jan"]*1_000).astype(int)
         print("renaming columns")
@@ -86,6 +91,7 @@ class Data:
             "TPopulation1Jan": "population",
             "Location": "name",
             "Time": "year",
+            "ISO2_code": "iso_2"
         }
         df.rename(columns=column_rename_map, inplace=True)
 
@@ -98,57 +104,6 @@ class Data:
         file_path = Data.download_file(Data.RELIG_DATA_URL)
         return pd.read_csv(file_path)
 
-    @staticmethod
-    def fix_vietnam(df):
-        """
-        Vietnam data is split due to historical reasons.
-        Concidering vietnam as one entity.
-        """
-        print("Fixing Vietnam data")
-        north = df[df["name"] == "DRV"]
-        south = df[df["name"] == "RVN"]
-        combined = (
-            pd.concat([north, south])
-            .groupby("year", as_index=False)
-            .sum(numeric_only=True)
-        )
-        combined["name"] = "DRV"
-        combined["abb"] = "DRV"
-        df_clean = df[~df["name"].isin(["DRV", "RVN", "VN", "VNM", "Vietnam"])]
-        df_final = pd.concat([df_clean, combined], ignore_index=True)
-        df_final = df_final.sort_values(["name", "year"]).reset_index(drop=True)
-        return df_final
-
-    @staticmethod
-    def fix_germany(df):
-        """
-        Germany data is split into three parts. Historical East and west germany.
-        This function combines them all into one entity.
-        """
-        print("Fixing germany data")
-        east  = df[df["name"] == "GDR"]
-        west  = df[df["name"] == "GFR"]
-        gmy   = df[df["name"] == "GMY"]
-        east_west_sum = (
-            pd.concat([east, west])
-            .groupby("year", as_index=False)
-            .sum(numeric_only=True)
-        )
-        east_west_sum["name"] = "GMY"
-        unified = gmy.copy()
-        unified["name"] = "GMY"
-        unified = unified[unified["year"] >= 1990]
-        east_1990 = east[east["year"] == 1990]
-        if not east_1990.empty:
-            unified.loc[unified["year"] == 1990, df.select_dtypes(include="number").columns] += \
-                east_1990[df.select_dtypes(include="number").columns].values
-        germany_df = pd.concat([east_west_sum[east_west_sum["year"] < 1990], unified], ignore_index=True)
-        germany_df["abb"] = "GMY"
-        df_clean = df[~df["name"].isin(["GDR", "GFR", "GMY"])].copy()
-        df_final = pd.concat([df_clean, germany_df], ignore_index=True)
-        df_final = df_final.sort_values(["name", "year"]).reset_index(drop=True)
-        return df_final
-    
     @staticmethod
     def remove_split_countries(df, name = "name"):
         """
@@ -222,17 +177,47 @@ class Data:
             ),
             "pop": df["pop"]
         })
-        relig_df = Data.fix_germany(relig_df)
-        relig_df = Data.fix_vietnam(relig_df)
-        relig_df = Data.remove_split_countries(relig_df)
         codes = pd.read_csv(Data.download_file("https://correlatesofwar.org/wp-content/uploads/COW-country-codes.csv")).drop_duplicates("StateAbb")
         print("Resolving country names to COW statename")
         code_map = codes.set_index("StateAbb")["StateNme"]
         relig_df["name"] = relig_df["name"].map(code_map)
-        relig_df = Data.add_a2_values(relig_df)
+        # relig_df = Data.add_a2_values(relig_df)
         print("Base relig data processed")
-        return relig_df.sort_values(["alpha_2", "year"]).reset_index(drop=True)
-    
+        return relig_df.sort_values(["name", "year"]).reset_index(drop=True)
+
+    @staticmethod
+    def get_countries_with_range_atleast(df, y_range = 50):
+        country_year_ranges = (
+            df.groupby("name")["year"]
+            .agg(["min", "max"])
+            .apply(lambda row: [row["min"], row["max"]], axis=1)
+            .to_dict()
+        )
+        c_data = [{"name": country, "range": int(val[1] - val[0])} for country, val in country_year_ranges.items()]
+        c_data.sort(key = lambda x: x["range"])
+        return [data["name"] for data in c_data if data["range"] >= y_range]
+
+    @staticmethod
+    def get_country_pop_max_relative_change(df, c_name = "name", c_pop = "pop", c_year = "year"):
+        df_sorted = df.sort_values([c_name, c_year])
+        df_sorted["rel_change"] = df_sorted.groupby(c_name)[c_pop].pct_change().abs()
+        return (
+            df_sorted.groupby(c_name)["rel_change"]
+            .max()
+            .dropna()
+            .to_dict()
+        )
+
+    @staticmethod
+    def clean_relig_data(df):
+        reasonable_range_countries = Data.get_countries_with_range_atleast(df, 50)
+        df = df[df["name"].isin(reasonable_range_countries)]
+        changes = sorted([(key, value) for key, value in Data.get_country_pop_max_relative_change(df).items()], key= lambda x:x[1], reverse=True)
+        reasonable_max_change_countries = [i[0] for i in changes if i[1] < 0.3]
+        df = df[df["name"].isin(reasonable_max_change_countries)]
+        df = Data.add_a2_values(df)
+        return df.sort_values(["name", "year"]).reset_index(drop=True)
+        
     @staticmethod
     def enrich_relig_df(relig_df):
         print("Solving missing values for relig df")
@@ -268,24 +253,30 @@ class Data:
     @staticmethod
     def join_tables(pop_df, relig_df):
         print("combining tables")
-        # relig_df.drop(["abb", "name"], axis=1, inplace=True)
         combined_df = pd.merge(pop_df, relig_df, on=["alpha_2", "year"], how="inner")
-        return combined_df
+        desired_order = [
+            "name_x", "name_y", "alpha_2", "iso_2",  "abb", "year", "population", "pop",
+            "christian", "islam", "buddhist", "judaism", "nonrelig", "other"
+        ]
+        combined_df = combined_df[[col for col in desired_order if col in combined_df.columns]]
+        df = combined_df.copy()
+        df["pop_diff_ratio"] = ((df["pop"] - df["population"]).abs()) / df[["pop", "population"]].min(axis=1)
+        df_sorted = df.sort_values("pop_diff_ratio", ascending=False)
+        df_unique = df_sorted.drop_duplicates(subset="alpha_2", keep="first").reset_index(drop=True)
+        alpha_2s = df_unique[df_unique["pop_diff_ratio"] < 0.2]["alpha_2"].unique()
+        combined_df = combined_df[combined_df["alpha_2"].isin(alpha_2s)]
+        return combined_df.copy().reset_index(drop=True).sort_values(["alpha_2", "year"])
 
 
 if __name__ == "__main__":
-    relig_raw_df = Data.get_relig_df()
-    relig_raw_df.to_csv("data/religion_base.csv")
-    relig_df = Data.enrich_relig_df(relig_raw_df)
-    # print(relig_df.head(10))
-    relig_df.to_csv("data/religion_enriched.csv")
-    pop_df = Data.get_pop_df()
-    pop_df.to_csv(Data.POP_PROCESSED_PATH)
-    # print(pop_df.head(20))
-
-    total_df = Data.join_tables(pop_df, relig_df)
-    total_df.to_csv("data/pop_relig_inner.csv")
-
-
-
-    
+    if True:
+        relig_raw_df = Data.get_relig_df()
+        relig_clean_df = Data.clean_relig_data(relig_raw_df)
+        relig_rich_df = Data.enrich_relig_df(relig_clean_df)
+        relig_rich_df.to_csv("data/cleaned_relig_df.csv")
+        pop_df = Data.get_pop_df()
+        pop_df.to_csv("data/cleaned_pop_df.csv")
+        df = Data.join_tables(pop_df, relig_rich_df)
+        df.to_csv("data/cleaned_pop_relig_df.csv")
+    else:
+        df = pd.read_csv("data/cleaned_pop_relig_df.csv")
