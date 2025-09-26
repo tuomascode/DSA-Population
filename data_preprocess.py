@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 
 from scipy.interpolate import PchipInterpolator
-from database.utils import get_country
+from database.utils import get_country, code_based_get
 
 def solve_missing_values(y, x):
     all_years = np.arange(min(x), max(x) + 1, 1)
@@ -136,7 +136,10 @@ class Data:
             try:
                 mapping[c] = get_country(c).alpha_2
             except:
-                failed.append(c)
+                try:
+                    mapping[c] = code_based_get(c).alpha_2
+                except:
+                    failed.append(c)
         if failed:
             print(failed)
             raise KeyError(f"{', '.join(failed)} not found by get_country")
@@ -196,6 +199,21 @@ class Data:
         c_data = [{"name": country, "range": int(val[1] - val[0])} for country, val in country_year_ranges.items()]
         c_data.sort(key = lambda x: x["range"])
         return [data["name"] for data in c_data if data["range"] >= y_range]
+
+    @staticmethod
+    def get_countries_with_min_range(df, lower, upper):
+        country_year_ranges = (
+            df.groupby("name")["year"]
+            .agg(["min", "max"])
+            .apply(lambda row: [row["min"], row["max"]], axis=1)
+            .to_dict()
+        )
+        result = [
+            country
+            for country, (min_year, max_year) in country_year_ranges.items()
+            if min_year <= lower and max_year >= upper
+        ]
+        return result
 
     @staticmethod
     def get_country_pop_max_relative_change(df, c_name = "name", c_pop = "pop", c_year = "year"):
