@@ -201,9 +201,9 @@ class Data:
         return [data["name"] for data in c_data if data["range"] >= y_range]
 
     @staticmethod
-    def get_countries_with_min_range(df, lower, upper):
+    def get_countries_with_min_range(df, lower, upper, name = "name_x"):
         country_year_ranges = (
-            df.groupby("name")["year"]
+            df.groupby("name_x")["year"]
             .agg(["min", "max"])
             .apply(lambda row: [row["min"], row["max"]], axis=1)
             .to_dict()

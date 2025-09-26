@@ -26,14 +26,14 @@ if redo:
     ]
     combined_df = combined_df[[col for col in desired_order if col in combined_df.columns]]
     combined_df.reset_index(drop=True).sort_values(["alpha_2", "year"])
-    names = combined_df["name_x"].unique()
+    all_names = combined_df["name_x"].unique()
     countries = Data.get_countries_with_min_range(combined_df, 1960, 2010)
-    drop_names = [n for n in names if n not in countries]
-    cleaned_df = combined_df[~combined_df["name_x"].isin(drop_names)].dropna().reset_index(drop=True)
-    # print(list(cleaned_df))
-    # cleaned_df = cleaned_df.drop(columns=['Unnamed: 0'])
+    cleaned_df = combined_df[combined_df["name_x"].isin(countries)].dropna().reset_index(drop=True)
     cleaned_df.to_csv("data/cleaned_pop_gdp_relig_df.csv")
 else:
     cleaned_df = pd.read_csv("data/cleaned_pop_gdp_relig_df.csv")
 
-cleaned_df.head(5)
+print(clean_data["name_x"].unique())
+# for c in countries:
+#     if c not in range_countries:
+#         print(c)
