@@ -6,3 +6,4 @@ pycountry
 matplotlib
 scipy
 tqdm
+plotly
