@@ -180,11 +180,14 @@ class Data:
             ),
             "pop": df["pop"]
         })
-        codes = pd.read_csv(Data.download_file("https://correlatesofwar.org/wp-content/uploads/COW-country-codes.csv")).drop_duplicates("StateAbb")
+        codes = pd.read_csv(
+            Data.download_file(
+                "https://correlatesofwar.org/wp-content/uploads/COW-country-codes.csv")
+                ).drop_duplicates("StateAbb")
         print("Resolving country names to COW statename")
         code_map = codes.set_index("StateAbb")["StateNme"]
         relig_df["name"] = relig_df["name"].map(code_map)
-        # relig_df = Data.add_a2_values(relig_df)
+        relig_df = Data.add_a2_values(relig_df)
         print("Base relig data processed")
         return relig_df.sort_values(["name", "year"]).reset_index(drop=True)
 
@@ -230,10 +233,17 @@ class Data:
     def clean_relig_data(df):
         reasonable_range_countries = Data.get_countries_with_range_atleast(df, 50)
         df = df[df["name"].isin(reasonable_range_countries)]
-        changes = sorted([(key, value) for key, value in Data.get_country_pop_max_relative_change(df).items()], key= lambda x:x[1], reverse=True)
-        reasonable_max_change_countries = [i[0] for i in changes if i[1] < 0.3]
+        cutoff = 0.35
+        changes = sorted(
+            [(key, value) for key, value in Data.get_country_pop_max_relative_change(df).items()],
+            key = lambda x:x[1], reverse=True)
+        reasonable_max_change_countries = [i[0] for i in changes if i[1] < cutoff]
+        dropped_max_change_countries = [(i[0], i[1]) for i in changes if i[1] >=cutoff]
+        print("Dropping countries due to too large change:")
+        for c, d in dropped_max_change_countries:
+            print(c, d)
         df = df[df["name"].isin(reasonable_max_change_countries)]
-        df = Data.add_a2_values(df)
+        # df = Data.add_a2_values(df)
         return df.sort_values(["name", "year"]).reset_index(drop=True)
         
     @staticmethod
@@ -269,20 +279,26 @@ class Data:
         return new_df.sort_values(["alpha_2", "year"]).reset_index(drop=True)
     
     @staticmethod
-    def join_tables(pop_df, relig_df):
+    def join_tables(pop_df, relig_df, drop_large_diffs = False):
         print("combining tables")
-        combined_df = pd.merge(pop_df, relig_df, on=["alpha_2", "year"], how="inner")
+        combined_df = pd.merge(pop_df, relig_df, on=["alpha_2", "year"], how="outer")
+        combined_df["name"] = combined_df.apply(
+            lambda row: row["name_y"] if pd.notna(row["name_y"]) else row["name_x"],
+            axis=1
+        )
+        combined_df.drop(columns=["name_x", "name_y"], inplace=True)
         desired_order = [
-            "name_x", "name_y", "alpha_2", "iso_2",  "abb", "year", "population", "pop",
+            "name", "alpha_2", "iso_2",  "abb", "year", "population", "pop",
             "christian", "islam", "buddhist", "judaism", "nonrelig", "other"
         ]
         combined_df = combined_df[[col for col in desired_order if col in combined_df.columns]]
         df = combined_df.copy()
-        df["pop_diff_ratio"] = ((df["pop"] - df["population"]).abs()) / df[["pop", "population"]].min(axis=1)
-        df_sorted = df.sort_values("pop_diff_ratio", ascending=False)
-        df_unique = df_sorted.drop_duplicates(subset="alpha_2", keep="first").reset_index(drop=True)
-        alpha_2s = df_unique[df_unique["pop_diff_ratio"] < 0.2]["alpha_2"].unique()
-        combined_df = combined_df[combined_df["alpha_2"].isin(alpha_2s)]
+        if drop_large_diffs:
+            df["pop_diff_ratio"] = ((df["pop"] - df["population"]).abs()) / df[["pop", "population"]].min(axis=1)
+            df_sorted = df.sort_values("pop_diff_ratio", ascending=False)
+            df_unique = df_sorted.drop_duplicates(subset="alpha_2", keep="first").reset_index(drop=True)
+            alpha_2s = df_unique[df_unique["pop_diff_ratio"] < 0.2]["alpha_2"].unique()
+            combined_df = combined_df[combined_df["alpha_2"].isin(alpha_2s)]
         return combined_df.copy().reset_index(drop=True).sort_values(["alpha_2", "year"])
 
 
