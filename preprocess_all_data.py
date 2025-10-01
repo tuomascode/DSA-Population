@@ -25,4 +25,9 @@ combined_df.drop(columns=["name_x", "name_y"], inplace=True)
 desired_order = ['name', 'alpha_2', 'iso_2', 'abb', 'year', 'population', 'pop', 'GDP', 'christian', 'islam', 'buddhist', 'judaism', 'nonrelig', 'other', 'Fertility rate, total (births per woman) [SP.DYN.TFRT.IN]', 'Birth rate, crude (per 1,000 people) [SP.DYN.CBRT.IN]', 'Death rate, crude (per 1,000 people) [SP.DYN.CDRT.IN]', 'Life expectancy at birth, total (years) [SP.DYN.LE00.IN]', 'Net migration [SM.POP.NETM]', 'Individuals using the Internet (% of population) [IT.NET.USER.ZS]', 'Gini index [SI.POV.GINI]', 'Human capital index (HCI) (scale 0-1) [HD.HCI.OVRL]', 'School enrollment, secondary (gross), gender parity index (GPI) [SE.ENR.SECO.FM.ZS]', 'Literacy rate, youth (ages 15-24), gender parity index (GPI) [SE.ADT.1524.LT.FM.ZS]', 'Urban population (% of total population) [SP.URB.TOTL.IN.ZS]', 'Mortality rate, infant (per 1,000 live births) [SP.DYN.IMRT.IN]', 'Current health expenditure per capita, PPP (current international $) [SH.XPD.CHEX.PP.CD]', 'Population, female (% of total population) [SP.POP.TOTL.FE.ZS]', 'Population, male (% of total population) [SP.POP.TOTL.MA.ZS]', 'Population, total [SP.POP.TOTL]']
 combined_df = combined_df[[col for col in desired_order if col in combined_df.columns]]
 combined_df = combined_df.copy()
+combined_df.reset_index(drop=True, inplace=True)
+combined_df.sort_values(["alpha_2", "year"], inplace= True)
 combined_df.to_csv("data/cleaned_all_data.csv")
+
+combined_df.dropna(inplace=True)
+print(combined_df.shape)

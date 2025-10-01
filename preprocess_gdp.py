@@ -30,7 +30,8 @@ if redo:
         )
     combined_df.drop(columns=["name_x", "name_y"], inplace=True)
     combined_df = combined_df[[col for col in desired_order if col in combined_df.columns]]
-    combined_df.reset_index(drop=True).sort_values(["alpha_2", "year"])
+    combined_df.reset_index(drop=True, inplace=True)
+    combined_df.sort_values(["alpha_2", "year"], inplace= True)
     if False:
         all_names = combined_df["name_x"].unique()
         countries = Data.get_countries_with_min_range(combined_df, 1960, 2010)
