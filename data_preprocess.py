@@ -82,7 +82,7 @@ class Data:
         dropped_countries = [i for i in df["Location"].unique() if i not in reasonable_max_change_countries]
         print("Dropped countries due to too big change: ", " ".join(dropped_countries))
         df = df[df["Location"].isin(reasonable_max_change_countries)]
-        Data.rename_countries(df)
+        # Data.rename_countries(df)
         df = df[df["Time"] > 1945]
         df = df[df["Time"] < 2025]
         df["TPopulation1Jan"] = (df["TPopulation1Jan"]*1_000).astype(int)
@@ -305,12 +305,13 @@ class Data:
 if __name__ == "__main__":
     if True:
         relig_raw_df = Data.get_relig_df()
-        relig_clean_df = Data.clean_relig_data(relig_raw_df)
-        relig_rich_df = Data.enrich_relig_df(relig_clean_df)
-        relig_rich_df.to_csv("data/cleaned_relig_df.csv")
-        pop_df = Data.get_pop_df()
-        pop_df.to_csv("data/cleaned_pop_df.csv")
-        df = Data.join_tables(pop_df, relig_rich_df)
-        df.to_csv("data/cleaned_pop_relig_df.csv")
+        relig_raw_df.to_csv("data/raw_relig_data.csv")
+        # relig_clean_df = Data.clean_relig_data(relig_raw_df)
+        # relig_rich_df = Data.enrich_relig_df(relig_clean_df)
+        # relig_rich_df.to_csv("data/cleaned_relig_df.csv")
+        # pop_df = Data.get_pop_df()
+        # pop_df.to_csv("data/cleaned_pop_df.csv")
+        # df = Data.join_tables(pop_df, relig_rich_df)
+        # df.to_csv("data/cleaned_pop_relig_df.csv")
     else:
         df = pd.read_csv("data/cleaned_pop_relig_df.csv")
