@@ -7,3 +7,5 @@ matplotlib
 scipy
 tqdm
 plotly
+lightgbm
+scikit-learn

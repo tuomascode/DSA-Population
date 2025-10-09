@@ -49,7 +49,7 @@ class DataEntry(Base):
     # literacy_rate: orm.Mapped[float|None] = orm.mapped_column(comment="Literacy rate, youth (ages 15-24), gender parity index (GPI)")
 
     # Relationship
-    country: orm.Mapped["Country"] = orm.relationship(back_populates="records")
+    country: orm.Mapped["Country"] = orm.relationship(back_populates="records", lazy="selectin")
 
 class Country(Base):
     """Used to declare constants regarding each country itself."""
