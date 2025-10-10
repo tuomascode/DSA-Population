@@ -4,31 +4,8 @@ from database import models
 
 from pycountry import countries
 
-custom_map = {
-    "Antigua & Barbuda": "Antigua and Barbuda",
-    "Cape Verde": "Cabo Verde",
-    "Niger": "Republic of the Niger",
-    "Czechoslovakia": "Czechoslovakia",  # historical, pycountry will fail
-    "Democratic Republic of the Congo": "Congo, The Democratic Republic of the",
-    "East Timor": "Timor-Leste",
-    "German Democratic Republic": "East Germany",  # not in pycountry
-    "German Federal Republic": "West Germany",     # not in pycountry
-    "Ivory Coast": "Côte d'Ivoire",
-    "Republic of Vietnam": "South Vietnam",        # not in pycountry
-    "St. Kitts and Nevis": "Saint Kitts and Nevis",
-    "St. Lucia": "Saint Lucia",
-    "St. Vincent and the Grenadines": "Saint Vincent and the Grenadines",
-    "Swaziland": "Eswatini",
-    "Turkey": "Türkiye",
-    "Yemen Arab Republic": "North Yemen",          # not in pycountry
-    "Yemen People's Republic": "South Yemen",      # not in pycountry
-    "Yugoslavia": "Yugoslavia"                     # not in pycountry
-}
-
 
 def get_country(name: str):
-    if name in custom_map:
-        name = custom_map[name]
     return countries.search_fuzzy(name)[0]
 
 def code_based_get(alpha3: str):
