@@ -1,4 +1,4 @@
-,name,alpha_2,year,population_WDI,GDP,life_expectancy,net_migration,internet_users_pct,human_capital_index,school_enroll_secondary_gpi,youth_literacy_gpi,urban_population_pct,infant_mortality_rate,female_population_pct,male_population_pct
+,name,alpha_2,year,population,GDP,life_expectancy,net_migration,internet_users_pct,human_capital_index,school_enroll_secondary_gpi,youth_literacy_gpi,urban_population_pct,infant_mortality_rate,female_population_pct,male_population_pct
 10,Andorra,AD,1970,19977.0,3935.411278,74.452,1145,,,1.01363003253937,,80.155,,46.6936977524153,53.3063022475847
 11,Andorra,AD,1971,21442.0,4169.695371,74.615,1166,,,1.01363003253937,,81.78,,46.5395019121351,53.4604980878649
 12,Andorra,AD,1972,22957.0,4940.296962,74.864,1177,,,1.22162997722626,,83.301,,46.3930998431783,53.6069001568217
