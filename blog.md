@@ -1,8 +1,8 @@
-GDP per Capita Prediction
+# GDP per Capita Prediction
 
 This project aims to predict changes in GDP per capita using social and demographic features.
 
-The Aim and Uses
+## The Aim and Uses
 
 The aim of this project and website is to provide both policymakers and investors with
 a rough idea of how different social and demographic factors impact GDP per capita.
@@ -10,31 +10,20 @@ a rough idea of how different social and demographic factors impact GDP per capi
 We collected and analyzed data from 154 countries covering the period 1960–2023.
 Our dataset includes the following features:
 
-Country name
+1. Country name
+2. Country alpha-2 code
+3. Year
+4. Population
+5. GDP per capita
+6. Life expectancy
+7. Net migration
+8. Proportion of population using the internet
+9. WDI Human Capital Index
+10. WDI School Enrollment Index
+11. Proportion of urban population
+12. Infant mortality rate
 
-Country alpha-2 code
-
-Year
-
-Population
-
-GDP per capita
-
-Life expectancy
-
-Net migration
-
-Proportion of population using the internet
-
-WDI Human Capital Index
-
-WDI School Enrollment Index
-
-Proportion of urban population
-
-Infant mortality rate
-
-Results of Analysis
+## Results of Analysis
 
 Our main finding was that changes in these features did affect GDP per capita,
 but primarily in the long term. This makes intuitive sense — improving school enrollment
@@ -55,7 +44,7 @@ you should look for countries that have recently improved in key indicators but 
 realized corresponding GDP per capita growth. Conversely, investors seeking short-term
 gains should not rely on these features as predictors of near-term growth.
 
-The Product
+## The Product
 
 We offer a website built around our collected data and predictive models. It allows users
 to quickly and easily visualize and explore data, compare countries, download datasets,
